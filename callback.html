@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Devir Sentinel · Autorización</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f8fa;
+      color: #0b3156;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: radial-gradient(circle at top, #ddfbfb 0, #f4f8fa 42%, #eef3f6 100%);
+    }
+    main {
+      width: min(100%, 620px);
+      padding: 36px;
+      border: 1px solid #cae1e7;
+      border-radius: 24px;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 24px 70px rgba(11,49,86,.14);
+    }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: #0b3156;
+      color: #16c7c9;
+      font-size: 26px;
+      font-weight: 900;
+    }
+    h1 { margin: 20px 0 8px; font-size: clamp(28px, 6vw, 42px); }
+    p { margin: 0 0 22px; color: #49657b; line-height: 1.6; }
+    label { display: block; margin-bottom: 8px; font-weight: 750; }
+    .code-row { display: flex; gap: 10px; }
+    input {
+      min-width: 0;
+      flex: 1;
+      padding: 14px 16px;
+      border: 1px solid #afcbd4;
+      border-radius: 12px;
+      background: #f8fbfc;
+      color: #0b3156;
+      font: inherit;
+    }
+    button {
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 12px;
+      background: #0b3156;
+      color: white;
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    button:hover { background: #124d78; }
+    .status { margin-top: 18px; font-size: 14px; }
+    .success { color: #087f65; }
+    .error { color: #b42318; }
+    [hidden] { display: none !important; }
+    @media (max-width: 520px) {
+      main { padding: 26px 20px; }
+      .code-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="mark" aria-hidden="true">DS</div>
+    <h1>Autorización recibida</h1>
+    <p id="message">Copiá el código y volvé a la Terminal para completar la conexión de Devir Sentinel.</p>
+
+    <section id="code-section" hidden>
+      <label for="authorization-code">Código de autorización</label>
+      <div class="code-row">
+        <input id="authorization-code" type="text" readonly autocomplete="off" spellcheck="false">
+        <button id="copy-button" type="button">Copiar código</button>
+      </div>
+      <p id="copy-status" class="status success" aria-live="polite"></p>
+    </section>
+
+    <p id="error-message" class="status error" hidden></p>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const error = params.get("error");
+    const errorDescription = params.get("error_description");
+    const codeSection = document.getElementById("code-section");
+    const codeInput = document.getElementById("authorization-code");
+    const message = document.getElementById("message");
+    const errorMessage = document.getElementById("error-message");
+
+    if (code) {
+      codeInput.value = code;
+      codeSection.hidden = false;
+    } else {
+      message.textContent = "No se recibió un código de autorización.";
+      errorMessage.textContent = errorDescription || error || "Volvé a iniciar la autorización desde Devir Sentinel.";
+      errorMessage.hidden = false;
+    }
+
+    document.getElementById("copy-button").addEventListener("click", async () => {
+      const status = document.getElementById("copy-status");
+      try {
+        await navigator.clipboard.writeText(codeInput.value);
+        status.textContent = "Código copiado. Ya podés volver a la Terminal.";
+      } catch (_) {
+        codeInput.select();
+        document.execCommand("copy");
+        status.textContent = "Código copiado. Ya podés volver a la Terminal.";
+      }
+    });
+  </script>
+</body>
+</html>
